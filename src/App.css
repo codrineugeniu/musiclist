@@ -1,0 +1,32 @@
+
+.search-bar h6 {
+}
+
+div.search-input {
+  margin-right: 10px;
+  margin-left: 10%;
+}
+
+.search-input input {
+  color: white;
+}
+
+ul.search-results {
+  width: 50%;
+  margin-left: 10%;
+}
+
+.result .add-button {
+  opacity: 0;
+  transition: opacity 2ms;
+}
+
+.result:hover .add-button {
+  opacity:1;
+  transition: opacity 2ms;
+}
+
+.artist-card {
+  max-width: 300px;
+  margin: 10px;
+}
