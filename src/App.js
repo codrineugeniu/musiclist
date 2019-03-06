@@ -2,23 +2,19 @@ import React, { Component } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
+import { getArtists } from './services/api';
 
 import {
   TextField,
   Button,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Avatar,
-  Card,
-  CardContent
+  List
 } from '@material-ui/core';
-import axios from 'axios';
+
+import { ArtistCard } from './components/ArtistCard';
+import { SearchResult } from './components/SearchResult';
 
 import './App.css';
-
-const API_URL = 'http://ws.audioscrobbler.com/2.0/?limit=5&format=json&method=artist.search&api_key=' + process.env.REACT_APP_LASTFM_APPKEY;
+import { get } from 'https';
 
 const isEmpty = (str) => str.length === 0;
 class App extends Component {
@@ -40,19 +36,10 @@ class App extends Component {
     this.setState({ searchTerm: value });
   }
 
-  search = (terms) => {
-    const request = API_URL + '&artist=' + terms;
+  search = async (terms) => {
 
-    axios.get(request).then((response) => {
-      const results = response.data.results;
-      const artists = results.artistmatches.artist.map((artist) => {
-        const avatarImage = artist.image.find(image => image.size === 'medium');
-        const imageUrl = avatarImage['#text'];
-        return { ...artist, avatar: imageUrl }
-      });
-
-      this.setState({ artists });
-    })
+    const artists = await getArtists(terms);
+    this.setState({ artists: artists })
   }
 
   onSearchClick = () => {
@@ -66,12 +53,21 @@ class App extends Component {
     })
   }
 
+  updateArtists = (newArtists) => {
+    this.setState({ savedArtists: newArtists })
+    localStorage.setItem('savedArtists', JSON.stringify(newArtists));
+  }
+
+  deleteArtist = (artist) => {
+    const result = this.state.savedArtists.filter(item => item.name !== artist.name);
+    this.updateArtists(result);
+  }
+
   onResultClick = (artist) => {
     this.clearSearch();
     const savedArtists = this.state.savedArtists;
-    savedArtists.push(artist)
-    this.setState({ savedArtists: savedArtists })
-    localStorage.setItem('savedArtists', JSON.stringify(savedArtists));
+    savedArtists.push(artist);
+    this.updateArtists(savedArtists);
   }
 
   render() {
@@ -112,41 +108,15 @@ class App extends Component {
 
         <List className="search-results">
           {
-            results.map((artist) => {
-              return (
-                <ListItem
-                  button
-                  key={artist.name}
-                  className="result"
-                  onClick={() => this.onResultClick(artist)}
-                >
-                  <ListItemAvatar>
-                    <Avatar src={artist.avatar} alt={artist.name} />
-                  </ListItemAvatar>
-                  <ListItemText primary={artist.name} />
-                  <Button
-                    variant="outlined"
-                    color="secondary"
-                    size="small"
-                    className="add-button"
-                  >
-                    Add to favorites
-                  </Button>
-                </ListItem>
-              )
+            results.map((artist, index) => {
+              return <SearchResult key={index} artist={artist} onResultClick={this.onResultClick} />
             })
           }
         </List>
         <div className="artist-container">
           {
-            this.state.savedArtists.map((artist) => {
-              return (
-                <Card className="artist-card">
-                  <CardContent>
-                    {artist.name}
-                  </CardContent>
-                </Card>
-              )
+            this.state.savedArtists.map((artist, index) => {
+              return <ArtistCard artist={artist} key={index} deleteArtist={this.deleteArtist} />
             })
           }
         </div>

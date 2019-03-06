@@ -21,12 +21,28 @@ ul.search-results {
   transition: opacity 2ms;
 }
 
+.artist-container {
+  display: flex;
+  padding: 20px;
+}
+
+.image-container {
+  width: 240px;
+  display: flex;
+  align-items: center;
+}
+
+.image-container img {
+  max-height: 174px;
+}
+
 .result:hover .add-button {
   opacity:1;
   transition: opacity 2ms;
 }
 
 .artist-card {
-  max-width: 300px;
+  width: 240px;
+  min-height: 320px;
   margin: 10px;
 }
